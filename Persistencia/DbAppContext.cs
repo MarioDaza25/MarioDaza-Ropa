@@ -10,8 +10,10 @@ public class DbAppContext : DbContext
     {
     }
     //Aqui se establecen los DbSet<Entity> Entities { get; set; }
-    public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Rol> Roles { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<UsuarioRol> UsuarioRoles { get; set; }
+    
     protected override void OnModelCreating( ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
