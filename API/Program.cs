@@ -49,7 +49,11 @@ using(var scope= app.Services.CreateScope()){
     var loggerFactory = services.GetRequiredService<ILoggerFactory>();
     try{
     var context = services.GetRequiredService<DbAppContext>();
-    await context.Database.MigrateAsync();
+     await context.Database.MigrateAsync();
+    /* await DbAppContextSeed.SeedRolesAsync(context,loggerFactory);
+		await DbAppContextSeed.SeedAsync(context,loggerFactory);
+    } */
+    
     }
     catch(Exception ex){
     var _logger = loggerFactory.CreateLogger<Program>();
