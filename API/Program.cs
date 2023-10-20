@@ -1,12 +1,16 @@
 using System.Reflection;
 using API.Extensions;
+using API.Helpers.Errors;
 using AspNetCoreRateLimit;
 using Microsoft.EntityFrameworkCore;
 using Persistencia;
+using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).Enrich.FromLogContext().CreateLogger();
 
+builder.Logging.AddSerilog(logger);
+// Add services to the container.
 builder.Services.AddControllers(options => 
 {
     options.RespectBrowserAcceptHeader = true;
@@ -30,6 +34,9 @@ builder.Services.AddDbContext<DbAppContext>(options =>
 });
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -45,10 +52,11 @@ using(var scope= app.Services.CreateScope()){
     await context.Database.MigrateAsync();
     }
     catch(Exception ex){
-    var logger = loggerFactory.CreateLogger<Program>();
-    logger.LogError(ex,"Ocurrió un error durante la migración");
+    var _logger = loggerFactory.CreateLogger<Program>();
+    _logger.LogError(ex,"Ocurrió un error durante la migración");
     }
 }
+
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy"); //- le decimos que use el cors "CorsPolicy"
 app.UseAuthorization();

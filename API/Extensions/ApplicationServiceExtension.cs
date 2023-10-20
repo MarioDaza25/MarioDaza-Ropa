@@ -1,5 +1,6 @@
 using System.Text;
 using API.Helpers;
+using API.Helpers.Errors;
 using API.Services;
 using Aplicacion.UnitOfWork;
 using AspNetCoreRateLimit;
@@ -73,10 +74,10 @@ public static class ApplicationServiceExtension
 
      public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
-        //Configuration from AppSettings
+        //Configuracion de AppSettings
         services.Configure<JWT>(configuration.GetSection("JWT"));
 
-        //Adding Athentication - JWT
+        //Agrega Autenticacion - JWT
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -98,5 +99,26 @@ public static class ApplicationServiceExtension
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
                 };
             }); 
+    }
+
+    public static void AddValidationErrors(this IServiceCollection services)
+    {
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.InvalidModelStateResponseFactory = actionContext =>
+            {
+
+                var errors = actionContext.ModelState.Where(u => u.Value.Errors.Count > 0)
+                                                .SelectMany(u => u.Value.Errors)
+                                                .Select(u => u.ErrorMessage).ToArray();
+
+                var errorResponse = new ApiValidation()
+                {
+                    Errors = errors
+                };
+
+                return new BadRequestObjectResult(errorResponse);
+            };
+        });
     }
 }
