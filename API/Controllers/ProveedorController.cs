@@ -112,4 +112,18 @@ public class ProveedorController : BaseApiController
       var resultado = await _unitOfWork.Proveedores.ProveedoresPorTipoPersona(tipopersona);
       return _mapper.Map<List<ProveedorDto>>(resultado);
   } 
+
+  //Listar los insumos que son vendidos por un determinado proveedor. El usuario debe ingresar el Nit de proveedor.
+  [HttpGet("ConInsumos/{nit}")]
+  [ProducesResponseType(StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  public async Task<ActionResult<IEnumerable<ProveedorDto>>> InsumoPorProveedor(string nit)
+  {
+      if (nit == "")
+      {
+          return BadRequest("Ingrese un Dato.");
+      }
+      var resultado = await _unitOfWork.Proveedores.InsumoPorProveedor(nit);
+      return _mapper.Map<List<ProveedorDto>>(resultado);
+  } 
 }
