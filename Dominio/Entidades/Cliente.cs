@@ -9,4 +9,6 @@ public class Cliente : BaseEntity
     public DateOnly FechaRegistro { get; set; }
     public int Id_Municipio { get; set; }
     public Municipio Municipio { get; set; }
+    public ICollection<Orden> Ordenes { get; set; }
+    public ICollection<Venta> Ventas { get; set; }
 }
