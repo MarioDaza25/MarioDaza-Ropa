@@ -33,5 +33,6 @@ public class MappingProfiles : Profile
         CreateMap<TipoPersona,TipoPersonaDto>().ReverseMap();
         CreateMap<TipoProteccion,TipoProteccionDto>().ReverseMap();
         CreateMap<Venta,VentaDto>().ReverseMap();
+        CreateMap<DetalleOrden,DetalleConPrendaDto>().ReverseMap();
      }
  }

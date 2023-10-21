@@ -6,5 +6,4 @@ public class PrendaNombreDto
     public string Nombre { get; set; }
     public decimal ValorUnitCop { get; set; }
     public decimal ValorUnitUsd { get; set; }
-    public int Id_Genero { get; set; }
 }
