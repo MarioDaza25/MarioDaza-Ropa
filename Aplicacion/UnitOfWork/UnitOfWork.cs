@@ -109,7 +109,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         }
     }
 
-    public IDetalleVenta DetalleVenta 
+    public IDetalleVenta DetalleVentas 
     {
         get
         {

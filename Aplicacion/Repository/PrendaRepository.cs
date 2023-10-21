@@ -12,4 +12,6 @@ public class PrendaRepository : GenericRepository<Prenda>, IPrenda
     {
         _context = context;
     }
+
+    
 }

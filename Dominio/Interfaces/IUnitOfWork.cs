@@ -6,7 +6,7 @@ public interface IUnitOfWork
     IInsumo Insumos {get;}
     IInventario Inventarios {get;}
     ITalla Tallas {get;}
-    IDetalleVenta DetalleVenta {get;}
+    IDetalleVenta DetalleVentas {get;}
     IDepartamento Departamentos {get;}
     IPrenda Prendas {get;}
     IProveedor Proveedores {get;}

@@ -1,4 +1,7 @@
+using API.Dtos;
+using API.Helpers;
 using AutoMapper;
+using Dominio.Entidades;
 using Dominio.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,30 +25,30 @@ public class PrendaController : BaseApiController
   [HttpGet]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Get()
+  public async Task<ActionResult<IEnumerable<Prenda>>> Get()
   {
-      var nameVar = await unitOfWork.nameClassInterface.GetAllAsync();
+      var nameVar = await _unitOfWork.Prendas.GetAllAsync();
       return Ok(nameVar);
   }
 
   [HttpGet]
-  [ApiVersion(1.1)]
+  [ApiVersion("1.1")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<Pager<Dto>>> Get([FromQuery] Params entidadP)
+  public async Task<ActionResult<Pager<PrendaDto>>> Get([FromQuery] Params entidadP)
   {
-  var (totalRegistros, registros) = await _unitOfWork.Citas.GetAllAsync(entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
-  var lista = _mapper.Map<List<Dto>>(registros);
-  return new Pager<Dto>(listaCitas,totalRegistros,entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
+  var (totalRegistros, registros) = await _unitOfWork.Prendas.GetAllAsync(entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
+  var lista = _mapper.Map<List<PrendaDto>>(registros);
+  return new Pager<PrendaDto>(lista,totalRegistros,entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
   }
 
   [HttpPost]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Post(Dto nameDto)
+  public async Task<ActionResult<IEnumerable<Prenda>>> Post(PrendaDto nameDto)
   {
-  var resultado = _mapper.Map<Clase>(nameDto);
-      _unitOfWork.nameClases.Add(resultado);
+  var resultado = _mapper.Map<Prenda>(nameDto);
+      _unitOfWork.Prendas.Add(resultado);
       await _unitOfWork.SaveAsync();
       if (resultado == null)
       {
@@ -57,14 +60,14 @@ public class PrendaController : BaseApiController
   [HttpPut("{id}")]
   [ProducesResponseType(StatusCodes.Status204NoContent)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<IActionResult> Update(int id, [FromBody] Dto nameDto)
+  public async Task<IActionResult> Update(int id, [FromBody] PrendaDto nameDto)
   {
-      if (id != unameDto.Id)
+      if (id != nameDto.Id)
       {
           return BadRequest();
       }
   
-      var existe = await _unitOfWork.nameClass.GetByIdAsync(id);
+      var existe = await _unitOfWork.Prendas.GetByIdAsync(id);
       if (existe == null)
       {
           return NotFound();
@@ -72,8 +75,8 @@ public class PrendaController : BaseApiController
   
   
         _mapper.Map(nameDto, existe);
-      unitOfWork.nameClass.Update(existe);
-      await unitOfWork.SaveAsync();
+      _unitOfWork.Prendas.Update(existe);
+      await _unitOfWork.SaveAsync();
   
       return NoContent();
   }
@@ -83,13 +86,13 @@ public class PrendaController : BaseApiController
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
   public async Task<IActionResult> Delete(int id)
   {
-    var resultado = await unitOfWork.nameClass.GetByIdAsync(id);
+    var resultado = await _unitOfWork.Prendas.GetByIdAsync(id);
     if (resultado == null)
     {
       return NotFound();
     }
   
-    _unitOfWork.nameClass.Remove(resultado);
+    _unitOfWork.Prendas.Remove(resultado);
     await _unitOfWork.SaveAsync();
   
     return Ok();

@@ -1,4 +1,7 @@
+using API.Dtos;
+using API.Helpers;
 using AutoMapper;
+using Dominio.Entidades;
 using Dominio.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +10,7 @@ namespace API.Controllers;
 
 [ApiVersion("1.0")]
 [ApiVersion("1.1")]
-[Authorize(Roles = "Empleado, Administrador, Gerente")]
+//[Authorize(Roles = "Empleado, Administrador, Gerente")]
 public class OrdenController : BaseApiController
 {
   private readonly IUnitOfWork _unitOfWork;
@@ -22,30 +25,30 @@ public class OrdenController : BaseApiController
   [HttpGet]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Get()
+  public async Task<ActionResult<IEnumerable<Orden>>> Get()
   {
-      var nameVar = await unitOfWork.nameClassInterface.GetAllAsync();
+      var nameVar = await _unitOfWork.Ordenes.GetAllAsync();
       return Ok(nameVar);
   }
 
   [HttpGet]
-  [ApiVersion(1.1)]
+  [ApiVersion("1.1")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<Pager<Dto>>> Get([FromQuery] Params entidadP)
+  public async Task<ActionResult<Pager<OrdenDto>>> Get([FromQuery] Params entidadP)
   {
-  var (totalRegistros, registros) = await _unitOfWork.Citas.GetAllAsync(entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
-  var lista = _mapper.Map<List<Dto>>(registros);
-  return new Pager<Dto>(listaCitas,totalRegistros,entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
+  var (totalRegistros, registros) = await _unitOfWork.Ordenes.GetAllAsync(entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
+  var lista = _mapper.Map<List<OrdenDto>>(registros);
+  return new Pager<OrdenDto>(lista,totalRegistros,entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
   }
 
   [HttpPost]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Post(Dto nameDto)
+  public async Task<ActionResult<IEnumerable<Orden>>> Post(OrdenDto nameDto)
   {
-  var resultado = _mapper.Map<Clase>(nameDto);
-      _unitOfWork.nameClases.Add(resultado);
+  var resultado = _mapper.Map<Orden>(nameDto);
+      _unitOfWork.Ordenes.Add(resultado);
       await _unitOfWork.SaveAsync();
       if (resultado == null)
       {
@@ -57,14 +60,14 @@ public class OrdenController : BaseApiController
   [HttpPut("{id}")]
   [ProducesResponseType(StatusCodes.Status204NoContent)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<IActionResult> Update(int id, [FromBody] Dto nameDto)
+  public async Task<IActionResult> Update(int id, [FromBody] OrdenDto nameDto)
   {
-      if (id != unameDto.Id)
+      if (id != nameDto.Id)
       {
           return BadRequest();
       }
   
-      var existe = await _unitOfWork.nameClass.GetByIdAsync(id);
+      var existe = await _unitOfWork.Ordenes.GetByIdAsync(id);
       if (existe == null)
       {
           return NotFound();
@@ -72,8 +75,8 @@ public class OrdenController : BaseApiController
   
   
         _mapper.Map(nameDto, existe);
-      unitOfWork.nameClass.Update(existe);
-      await unitOfWork.SaveAsync();
+      _unitOfWork.Ordenes.Update(existe);
+      await _unitOfWork.SaveAsync();
   
       return NoContent();
   }
@@ -83,15 +86,25 @@ public class OrdenController : BaseApiController
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
   public async Task<IActionResult> Delete(int id)
   {
-    var resultado = await unitOfWork.nameClass.GetByIdAsync(id);
+    var resultado = await _unitOfWork.Ordenes.GetByIdAsync(id);
     if (resultado == null)
     {
       return NotFound();
     }
   
-    _unitOfWork.nameClass.Remove(resultado);
+    _unitOfWork.Ordenes.Remove(resultado);
     await _unitOfWork.SaveAsync();
   
     return Ok();
   }
+
+  //Listar las prendas de una orden de producción cuyo estado sea en producción. El usuario debe ingresar el número de orden de producción.
+  [HttpGet("ConPrendasSegunEstado/{numeroOrden}/{estadoProduccion}")]
+  [ProducesResponseType(StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  public async Task<ActionResult<IEnumerable<OrdenDto>>> PrendasPorOrdenYEstado(int numeroOrden, string estadoProduccion)
+  {
+      var resultado = await _unitOfWork.Ordenes.PrendasPorOrdenYEstado(numeroOrden,estadoProduccion);
+      return _mapper.Map<List<OrdenDto>>(resultado);
+  } 
 }

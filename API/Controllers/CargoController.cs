@@ -1,4 +1,7 @@
+using API.Dtos;
+using API.Helpers;
 using AutoMapper;
+using Dominio.Entidades;
 using Dominio.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,30 +24,32 @@ public class CargoController : BaseApiController
   [HttpGet]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Get()
+  public async Task<ActionResult<IEnumerable<CargoDto>>> Get()
   {
-      var nameVar = await unitOfWork.nameClassInterface.GetAllAsync();
-      return Ok(nameVar);
+      var cargo = await _unitOfWork.Cargos.GetAllAsync();
+      return Ok(cargo);
   }
 
+
   [HttpGet]
-  [ApiVersion(1.1)]
+  [ApiVersion("1.1")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<Pager<Dto>>> Get([FromQuery] Params entidadP)
+  public async Task<ActionResult<Pager<CargoDto>>> Get([FromQuery] Params cargoP)
   {
-  var (totalRegistros, registros) = await _unitOfWork.Citas.GetAllAsync(entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
-  var lista = _mapper.Map<List<Dto>>(registros);
-  return new Pager<Dto>(listaCitas,totalRegistros,entidadP.PageIndex,entidadP.PageSize,entidadP.Search);
+  var (totalRegistros, registros) = await _unitOfWork.Cargos.GetAllAsync(cargoP.PageIndex,cargoP.PageSize,cargoP.Search);
+  var lista = _mapper.Map<List<CargoDto>>(registros);
+  return new Pager<CargoDto>(lista,totalRegistros,cargoP.PageIndex,cargoP.PageSize,cargoP.Search);
   }
+
 
   [HttpPost]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<ActionResult<IEnumerable<nameClass>>> Post(Dto nameDto)
+  public async Task<ActionResult<IEnumerable<CargoDto>>> Post(CargoDto cargoDto)
   {
-  var resultado = _mapper.Map<Clase>(nameDto);
-      _unitOfWork.nameClases.Add(resultado);
+  var resultado = _mapper.Map<Cargo>(cargoDto);
+      _unitOfWork.Cargos.Add(resultado);
       await _unitOfWork.SaveAsync();
       if (resultado == null)
       {
@@ -56,23 +61,23 @@ public class CargoController : BaseApiController
   [HttpPut("{id}")]
   [ProducesResponseType(StatusCodes.Status204NoContent)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public async Task<IActionResult> Update(int id, [FromBody] Dto nameDto)
+  public async Task<IActionResult> Update(int id, [FromBody] CargoDto cargoDto)
   {
-      if (id != unameDto.Id)
+      if (id != cargoDto.Id)
       {
           return BadRequest();
       }
   
-      var existe = await _unitOfWork.nameClass.GetByIdAsync(id);
+      var existe = await _unitOfWork.Cargos.GetByIdAsync(id);
       if (existe == null)
       {
           return NotFound();
       }
   
   
-        _mapper.Map(nameDto, existe);
-      unitOfWork.nameClass.Update(existe);
-      await unitOfWork.SaveAsync();
+        _mapper.Map(cargoDto, existe);
+      _unitOfWork.Cargos.Update(existe);
+      await _unitOfWork.SaveAsync();
   
       return NoContent();
   }
@@ -82,13 +87,13 @@ public class CargoController : BaseApiController
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
   public async Task<IActionResult> Delete(int id)
   {
-    var resultado = await unitOfWork.nameClass.GetByIdAsync(id);
+    var resultado = await _unitOfWork.Cargos.GetByIdAsync(id);
     if (resultado == null)
     {
       return NotFound();
     }
   
-    _unitOfWork.nameClass.Remove(resultado);
+    _unitOfWork.Cargos.Remove(resultado);
     await _unitOfWork.SaveAsync();
   
     return Ok();
